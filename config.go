@@ -1,4 +1,4 @@
-package calendar
+package main
 
 import (
 	"encoding/json"

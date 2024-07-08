@@ -1,4 +1,4 @@
-package calendar
+package main
 
 import (
 	"bytes"
@@ -8,10 +8,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
-func AddItemToCalendar(config Config, calendar string, event gocal.Event) bool {
+func AddItemToCalendar(config Config, calendar string, event gocal.Event, wg *sync.WaitGroup) {
 	var notionCreatePageRequest NotionCreatePageRequest
 	notionCreatePageRequest.Parent.DatabaseID = config.DatabaseID
 	notionCreatePageRequest.Properties.Name.Title = append(notionCreatePageRequest.Properties.Name.Title, struct {
@@ -70,10 +71,11 @@ func AddItemToCalendar(config Config, calendar string, event gocal.Event) bool {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		return true
+		fmt.Printf("Added %s from %s\n", event.Summary, calendar)
 	} else {
-		return false
+		fmt.Printf("Failed to add %s from %s\n", event.Summary, calendar)
 	}
+	wg.Done()
 }
 
 type NotionCreatePageRequest struct {
